@@ -28,9 +28,8 @@ pip install jsonlines watchdog
 ## Example Output
 ```
 Watching /path/to/cowrie.json for new log entries...
-Username                       Password                                IP Address                      
-root                           123456                                  192.168.1.1                     
-admin                          password123                            203.0.113.45                    
+Timestamp                     Username                      Password                                IP Address                    
+2025-02-15 00:58:01           root                          genghaigang                             38.165.40.5                 
 ```
 
 ## Notes
