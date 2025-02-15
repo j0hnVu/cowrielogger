@@ -37,6 +37,6 @@ Timestamp                     Username                      Password            
 - The script clears the terminal before prompting for input and after confirming the file path.
 - If an invalid file path is entered, it will prompt the user again until a valid path is provided.
 
-## License
-This script is provided as-is under the MIT License. Contributions and modifications are welcome!
+## Contribution
+Contributions and modifications are welcome!
 
