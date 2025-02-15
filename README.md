@@ -29,7 +29,7 @@ pip install jsonlines watchdog
 ```
 Watching /path/to/cowrie.json for new log entries...
 Timestamp                     Username                      Password                                IP Address                    
-2025-02-15 00:58:01           root                          genghaigang                             38.165.40.5                 
+2025-02-15 00:58:01           root                          root                                    192.168.1.1
 ```
 
 ## Notes
