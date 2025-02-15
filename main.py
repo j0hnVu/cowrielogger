@@ -1,10 +1,11 @@
 import jsonlines
 import time
+import os
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-input_file = "cowrie.json"  # Your JSON log file
-output_file = "filtered.json"  # Output filtered file
+input_file = ""
+output_file = "./filtered.json"
 
 class LogFileHandler(FileSystemEventHandler):
     def __init__(self, input_file, output_file):
@@ -25,13 +26,24 @@ class LogFileHandler(FileSystemEventHandler):
                 for line in infile:
                     try:
                         json_obj = jsonlines.Reader([line]).read()  # Parse JSON
-                        if "cowrie.login" in json_obj.get("eventid", ""):
+                        if json_obj.get("eventid", "") in ["cowrie.login.success", "cowrie.login.failed"]:
+                            json_out = f"{json_obj.get('username', '').ljust(20)}{' ' * 10}{json_obj.get('password', '').ljust(30)}{' ' * 10}{json_obj.get('src_ip', '').ljust(20)}"
+                            print(json_out)
                             writer.write(json_obj)  # Write filtered event
                     except Exception as e:
-                        print(f"Skipping malformed line: {e}")
-
+                        # print(f"Skipping malformed line: {e}")
+                        continue
             self.last_position = infile.tell()  # Update last position
 
+os.system("clear")
+while True:
+    input_file = str(input("Cowrie JSON Location?\n"))
+    if os.path.exists(input_file):
+        break
+    os.system("clear")
+    print("Invalid Cowrie JSON file.")
+
+os.system("clear")
 # Setup Watchdog Observer
 event_handler = LogFileHandler(input_file, output_file)
 observer = Observer()
@@ -39,6 +51,7 @@ observer.schedule(event_handler, ".", recursive=False)  # Watch current director
 observer.start()
 
 print(f"Watching {input_file} for new log entries...")
+print(f"{'Username':<30}{'Password':<40}{'IP Address':<30}")
 try:
     while True:
         time.sleep(1)  # Keep script running
