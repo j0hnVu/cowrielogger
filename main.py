@@ -1,6 +1,7 @@
 import jsonlines
 import time
 import os
+from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -27,7 +28,7 @@ class LogFileHandler(FileSystemEventHandler):
                     try:
                         json_obj = jsonlines.Reader([line]).read()  # Parse JSON
                         if json_obj.get("eventid", "") in ["cowrie.login.success", "cowrie.login.failed"]:
-                            json_out = f"{json_obj.get('username', '').ljust(20)}{' ' * 10}{json_obj.get('password', '').ljust(30)}{' ' * 10}{json_obj.get('src_ip', '').ljust(20)}"
+                            json_out = f"{datetime.strptime(json_obj.get('timestamp', ''), '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S').ljust(20)}{' ' * 10}{json_obj.get('username', '').ljust(20)}{' ' * 10}{json_obj.get('password', '').ljust(30)}{' ' * 10}{json_obj.get('src_ip', '').ljust(20)}"
                             print(json_out)
                             writer.write(json_obj)  # Write filtered event
                     except Exception as e:
@@ -51,12 +52,12 @@ observer.schedule(event_handler, ".", recursive=False)  # Watch current director
 observer.start()
 
 print(f"Watching {input_file} for new log entries...")
-print(f"{'Username':<30}{'Password':<40}{'IP Address':<30}")
+print(f"{'Timestamp':<30}{'Username':<30}{'Password':<40}{'IP Address':<30}")
 try:
     while True:
         time.sleep(1)  # Keep script running
 except KeyboardInterrupt:
     observer.stop()
-    print("Stopped file monitoring.")
+    print("\nStopped file monitoring.")
 
 observer.join()
