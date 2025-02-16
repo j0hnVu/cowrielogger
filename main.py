@@ -11,7 +11,10 @@ def clear_screen():
 
 # Function to process the events
 def process_line(line):
-    event = json.loads(line.strip())  # Parse JSON from the line
+    try
+        event = json.loads(line.strip())  # Parse JSON from the line
+    except Exception as e:
+        print(f"Err:{e}")
     if event.get("eventid") in ["cowrie.login.success", "cowrie.login.failed"]:
         timestamp = datetime.strptime(event.get("timestamp"), '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
         username = event.get("username")
