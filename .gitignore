@@ -2,5 +2,5 @@
 cowrielogger-env/
 cowrie.json
 filtered.json
-test.py
+test*.py
 temp.py

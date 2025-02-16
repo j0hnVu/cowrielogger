@@ -5,9 +5,18 @@ from datetime import datetime
 
 # Path to your JSON file
 file_path = './cowrie.json'
+row, col = os.popen('stty size', 'r').read().strip().split()
+y = int(row)
+x = int(col)
 
 def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
+
+def display(a, b, c, d):
+    print(f"{a.ljust(int(x/4))}{b.ljust(int(x/4))}{c.ljust(int(x/4))}{d.ljust(int(x/4))}")
+
+def cmd_display(a, b, c):
+    print(f"{a.ljust(int(x/4))}CMD:{b.ljust(int(x/2)-4)}{c.ljust(int(x/4))}")
 
 # Function to process the events
 def process_line(line):
@@ -22,14 +31,15 @@ def process_line(line):
             src_ip = event.get("src_ip")
 
             if username and src_ip:
-                print(f"{timestamp.ljust(20)}{' ' * 10}{username.ljust(20)}{' ' * 10}{password.ljust(30)}{' ' * 10}{src_ip.ljust(20)}")
+                display(timestamp, username, password, src_ip)
+
         if event.get("eventid") in ["cowrie.command.input"]:
             timestamp = datetime.strptime(event.get("timestamp"), '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
             cmd = event.get("input")
             src_ip = event.get("src_ip")
 
             if cmd:
-                print(f"{timestamp.ljust(20)}{' ' * 10}CMD:{cmd.ljust(46)}{' ' * 20}{src_ip.ljust(20)}")
+                cmd_display(timestamp, cmd, src_ip)
     except Exception as e:
         print(f"Err:{e}")    
         
@@ -67,9 +77,8 @@ clear_screen()
 
 # Start watching the file
 print(f"Watching {file_path} for new log entries...")
-print(f"{'Timestamp':<30}{'Username':<30}{'Password':<40}{'IP Address':<30}")
+print(f"{'Timestamp':<{int(x/4)}}{'Username':<{int(x/4)}}{'Password':<{int(x/4)}}{'IP Address':<{int(x/4)}}")
 try:
     watch_file()
 except KeyboardInterrupt:
     print("\nStopped file monitoring.")
-
