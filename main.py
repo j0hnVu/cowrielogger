@@ -11,18 +11,28 @@ def clear_screen():
 
 # Function to process the events
 def process_line(line):
-    try
+    try:
         event = json.loads(line.strip())  # Parse JSON from the line
+
+        # Extract username/password/cmd/src_ip/timestamps
+        if event.get("eventid") in ["cowrie.login.success", "cowrie.login.failed"]:
+            timestamp = datetime.strptime(event.get("timestamp"), '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
+            username = event.get("username")
+            password = event.get("password")
+            src_ip = event.get("src_ip")
+
+            if username and src_ip:
+                print(f"{timestamp.ljust(20)}{' ' * 10}{username.ljust(20)}{' ' * 10}{password.ljust(30)}{' ' * 10}{src_ip.ljust(20)}")
+        if event.get("eventid") in ["cowrie.command.input"]:
+            timestamp = datetime.strptime(event.get("timestamp"), '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
+            cmd = event.get("input")
+            src_ip = event.get("src_ip")
+
+            if cmd:
+                print(f"{timestamp.ljust(20)}{' ' * 10}CMD:{cmd.ljust(46)}{' ' * 20}{src_ip.ljust(20)}")
     except Exception as e:
-        print(f"Err:{e}")
-    if event.get("eventid") in ["cowrie.login.success", "cowrie.login.failed"]:
-        timestamp = datetime.strptime(event.get("timestamp"), '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
-        username = event.get("username")
-        password = event.get("password")
-        src_ip = event.get("src_ip")
+        print(f"Err:{e}")    
         
-        if username and src_ip:  # Ensure all fields exist
-            print(f"{timestamp.ljust(20)}{' ' * 10}{username.ljust(20)}{' ' * 10}{password.ljust(30)}{' ' * 10}{src_ip.ljust(20)}")
 
 # Function to watch the file for new lines
 def watch_file():
@@ -35,11 +45,15 @@ def watch_file():
             new_line = f.readline()
             
             if new_line:
-                process_line(new_line)
+                try:
+                    process_line(new_line)
+                except Exception as e: # UnboundLocalError might happen here.
+                    print(f"err:{e}")
             else:
                 # Sleep for a short period before checking for new lines
                 time.sleep(1)
 
+# Main
 clear_screen()
 
 while True:
