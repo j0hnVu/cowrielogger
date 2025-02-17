@@ -23,8 +23,8 @@ A Python script to monitor and display live SSH activity from a Cowrie honeypot 
 
 ## Example Output
 ```
-print(f"[Settings] IP Logging = True")
-print(f"[Settings] Error Logging = False")
+[Settings] IP Logging = True
+[Settings] Error Logging = False
 Watching /path/to/cowrie.json for new log entries...
 Timestamp               Username           Password                   IP Address                    
 2025-02-15 00:58:01     root               root                       192.168.1.1
