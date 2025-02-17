@@ -1,6 +1,4 @@
 # Specify filepatterns you want git to ignore.
+.DS_Store
 cowrielogger-env/
 cowrie.json
-filtered.json
-test*.py
-temp.py
