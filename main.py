@@ -1,13 +1,20 @@
-import json
-import time
-import os
+import json, time, os, logging, traceback
 from datetime import datetime
 
 # Path to your JSON file
 file_path = './cowrie.json'
+
+# Very ugly way to get screen size to integer
 row, col = os.popen('stty size', 'r').read().strip().split()
 y = int(row)
 x = int(col)
+
+logging.basicConfig(
+    filename="err.log",
+    level=logging.ERROR,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
@@ -41,33 +48,43 @@ def process_line(line):
             if cmd:
                 cmd_display(timestamp, cmd, src_ip)
     except Exception as e:
-        print(f"Err:{e}")    
-        
+        logging.error(f"Error occurred: {e}\n{traceback.format_exc()}")
 
 # Function to watch the file for new lines
 def watch_file():
-    with open(file_path, 'r') as f:
-        # Move to the end of the file to watch for new lines
-        f.seek(0, 2)
-        
+
+    try:
+        # Logrotation check
+        ## Cowrie Logrotate use copy-truncate, so comparing inode won't work, so we compare file size instead.
+        last_size = os.path.getsize(file_path)
         while True:
-            # Read new lines
-            new_line = f.readline()
+            with open(file_path, 'r') as f:
+                # Move to the end of the file to watch for new lines
+                f.seek(0, 2)
             
-            if new_line:
-                try:
-                    process_line(new_line)
-                except Exception as e: # UnboundLocalError might happen here.
-                    print(f"err:{e}")
-            else:
-                # Sleep for a short period before checking for new lines
-                time.sleep(1)
+                while True:
+                    # Read new lines
+                    new_line = f.readline()
+            
+                    if new_line:
+                        process_line(new_line)
+                    else:
+                        # Sleep for a short period before checking for new lines
+                        time.sleep(1)
+
+                    current_size = os.path.getsize(file_path)
+                    if current_size < last_size:
+                        break
+    except Exception as e:
+            logging.error(f"Error occurred: {e}\n{traceback.format_exc()}")
+            time.sleep(1)
+        
 
 # Main
 clear_screen()
 
 while True:
-    file_path = input("Cowrie JSON Location?\n").strip()
+    file_path = input("Cowrie JSON Location? (Default: ./cowrie.json\n").strip()
     if os.path.exists(file_path):
         break
     clear_screen()
