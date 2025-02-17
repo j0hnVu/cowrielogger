@@ -4,22 +4,28 @@ from datetime import datetime
 # Path to your JSON file
 file_path = ''
 
-# IP Log & Error Log
+# IP Log & Error Log & CMD Log
 ip_log = False
 ip_log_file = 'ip.log'
 
 err_log = False
 err_log_file = 'err.log'
 
+cmd_log = False
+cmd_log_file = 'cmd.log'
+
 if "ip" in sys.argv:
     ip_log = True
 if "err" in sys.argv:
     err_log = True 
+if "cmd" in sys.argv:
+    cmd_log = True
 
-if len(sys.argv) > 3 or sys.argv not in ["ip_log", "err_log"]:
-    print("Usage: python main.py ip err")
+if len(sys.argv) > 4 or any(arg not in ["ip", "err", "cmd"] for arg in sys.argv[1:]):
+    print("Usage: python main.py ip err cmd")
     print("ip: IP Logging")
     print("err: Error Logging")
+    print("cmd: Malicous CMD Logging")
     sys.exit(1)
 
 # Logging config
@@ -64,6 +70,12 @@ def process_line(line):
             if username:
                 display(timestamp, username, password, src_ip)
 
+            if ip_log:
+                with open(ip_log_file, "a+") as iplog:
+                    iplog.seek(0)
+                    if event.get("src_ip") not in iplog.read():
+                        iplog.write(f"{event.get("src_ip")}\n")
+
         if event.get("eventid") in ["cowrie.command.input"]:
             timestamp = datetime.strptime(event.get("timestamp"), '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
             cmd = event.get("input")
@@ -72,11 +84,9 @@ def process_line(line):
             if cmd:
                 cmd_display(timestamp, cmd, src_ip)
 
-        if ip_log:
-            with open(ip_log_file, "a+") as iplog:
-                iplog.seek(0)
-                if event.get("src_ip") not in iplog.read():
-                    iplog.write(f"{event.get("src_ip")}\n")
+            if cmd_log:
+                with open(cmd_log_file, "a+") as cmdlog:
+                    cmdlog.write(f"{timestamp} from {src_ip}: {cmd}\n")
 
     except Exception as e:
         if err_log:
@@ -132,6 +142,7 @@ clear_screen()
 # Start watching the file
 print(f"[Settings] IP Logging = {ip_log}")
 print(f"[Settings] Error Logging = {err_log}")
+print(f"[Settings] Malicous CMD Logging = {cmd_log}")
 print(f"Watching {file_path} for new log entries...")
 print(f"{'Timestamp':<{int(x/4)}}{'Username':<{int(x/4)}}{'Password':<{int(x/4)}}{'IP Address':<{int(x/4)}}")
 try:
