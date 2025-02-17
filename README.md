@@ -13,7 +13,8 @@ A Python script to monitor and display live SSH activity from a Cowrie honeypot 
 ## Usage
    ```bash
    git clone https://github.com/j0hnVu/cowrielogger.git
-   touch ip.log err.log
+   cd cowrielogger
+   touch ip.log err.log cmd.log
    python main.py ip err
    ```
 
@@ -41,4 +42,5 @@ Contributions and modifications are welcome!
 
 ## Contact
 **Email**: hoanganh170788@gmail.com
+
 **Discord**: thatonempd
