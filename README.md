@@ -12,11 +12,13 @@ A Python script to monitor and display live SSH activity from a Cowrie honeypot 
 
 ## Usage
    ```bash
+   git clone https://github.com/j0hnVu/cowrielogger.git
    touch ip.log err.log
    python main.py ip err
    ```
 
    *ip*: IP Logging to ip.log
+
    *err*: Error Logging to err.log
 
 ## Example Output
