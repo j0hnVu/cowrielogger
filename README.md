@@ -4,7 +4,7 @@ A Python script to monitor and display live SSH activity from a Cowrie honeypot 
 
 ## Features
 - Real-time monitoring of SSH login attempts (success/failure) and executed commands
-- Output all malicious IPs to a log file for analysis
+- Output all malicious IPs and executed commands to log files for analysis
 
 ## Requirements
 - Python 3.x
@@ -20,6 +20,8 @@ A Python script to monitor and display live SSH activity from a Cowrie honeypot 
    *ip*: IP Logging to ip.log
 
    *err*: Error Logging to err.log
+
+   *cmd*: Executed command Logging to cmd.log
 
 ## Example Output
 ```
