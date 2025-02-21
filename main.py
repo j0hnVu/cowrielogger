@@ -6,14 +6,15 @@ file_path = ''
 
 # IP Log & Error Log & CMD Log
 ip_log = False
-ip_log_file = 'ip.log'
-
 err_log = False
-err_log_file = 'err.log'
-
 cmd_log = False
+
+# Log file location.
+ip_log_file = 'ip.log'
+err_log_file = 'err.log'
 cmd_log_file = 'cmd.log'
 
+# Find any args in command
 if "ip" in sys.argv:
     ip_log = True
 if "err" in sys.argv:
@@ -21,6 +22,7 @@ if "err" in sys.argv:
 if "cmd" in sys.argv:
     cmd_log = True
 
+# Arg validating
 if len(sys.argv) > 4 or any(arg not in ["ip", "err", "cmd"] for arg in sys.argv[1:]):
     print("Usage: python main.py ip err cmd")
     print("ip: IP Logging")
@@ -38,7 +40,6 @@ logging.basicConfig(
 
 # Very ugly way to get screen size to integer
 row, col = os.popen('stty size', 'r').read().strip().split()
-y = int(row)
 x = int(col)
 
 # Universal clrscr
@@ -70,6 +71,7 @@ def process_line(line):
             if username:
                 display(timestamp, username, password, src_ip)
 
+            # IP Logging
             if ip_log:
                 with open(ip_log_file, "a+") as iplog:
                     iplog.seek(0)
@@ -84,46 +86,44 @@ def process_line(line):
             if cmd:
                 cmd_display(timestamp, cmd, src_ip)
 
+            # CMD Logging
             if cmd_log:
                 with open(cmd_log_file, "a+") as cmdlog:
                     cmdlog.write(f"{timestamp} from {src_ip}: {cmd}\n")
 
     except Exception as e:
+        # Error Logging
         if err_log:
             logging.error(f"Error occurred: {e}\n{traceback.format_exc()}")
         pass
 
 # Function to watch the file for new lines
+## Currently not working. 
 def watch_file():
-
     try:
         # Logrotation check
-        ## Cowrie Logrotate use copy-truncate, so comparing inode won't work, so we compare file size instead.
-        last_size = os.path.getsize(file_path)
+        ## Time-based check logrotation time to break the loop.. Temp fix
         while True:
             with open(file_path, 'r') as f:
                 # Move to the end of the file to watch for new lines
                 f.seek(0, 2)
             
                 while True:
+                    if datetime.datetime.now().strftime("%H:%M:%S") >= "23:59:58":
+                        print("[INFO] Approaching log rotation time. Waiting and reopening...")
+                        time.sleep(3)  # Shorter sleep to avoid missing logs
+                        break
                     # Read new lines
                     new_line = f.readline()
             
                     if new_line:
                         process_line(new_line)
                     else:
-                        # Sleep for a short period before checking for new lines
                         time.sleep(1)
-
-                    current_size = os.path.getsize(file_path)
-                    if current_size < last_size:
-                        break
+            continue
     except Exception as e:
         if err_log:
             logging.error(f"Error occurred: {e}\n{traceback.format_exc()}")
-        time.sleep(1)
-        pass
-
 
 # Main
 clear_screen()
