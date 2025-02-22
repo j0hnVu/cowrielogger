@@ -1,4 +1,4 @@
-import json, time, os, logging, traceback, sys
+import json, time, os, logging, traceback, sys, requests
 from datetime import datetime
 
 # Path to your JSON file
@@ -8,6 +8,7 @@ file_path = ''
 ip_log = False
 err_log = False
 cmd_log = False
+ip_info_log = False
 
 # Log file location.
 ip_log_file = 'ip.log'
@@ -17,17 +18,22 @@ cmd_log_file = 'cmd.log'
 # Find any args in command
 if "ip" in sys.argv:
     ip_log = True
+if "ipinfo" in sys.argv:
+    ip_log = True
+    ip_info_log = True
 if "err" in sys.argv:
     err_log = True 
 if "cmd" in sys.argv:
     cmd_log = True
 
+
 # Arg validating
-if len(sys.argv) > 4 or any(arg not in ["ip", "err", "cmd"] for arg in sys.argv[1:]):
-    print("Usage: python main.py ip err cmd")
+if len(sys.argv) > 5 or any(arg not in ["ip", "err", "cmd", "ipinfo"] for arg in sys.argv[1:]):
+    print("Usage: python main.py ip err cmd ipinfo")
     print("ip: IP Logging")
     print("err: Error Logging")
     print("cmd: Malicous CMD Logging")
+    print("ipinfo: IP Info Logging (Also enable IP Logging)")
     sys.exit(1)
 
 # Logging config
@@ -77,6 +83,8 @@ def process_line(line):
                     iplog.seek(0)
                     if event.get("src_ip") not in iplog.read():
                         iplog.write(f"{event.get("src_ip")}\n")
+                    if ip_info_log:
+                        iplog.write(f"{getIPInfo(event.get("src_ip"))}\n")
 
         if event.get("eventid") in ["cowrie.command.input"]:
             timestamp = datetime.strptime(event.get("timestamp"), '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
@@ -98,7 +106,7 @@ def process_line(line):
         pass
 
 # Function to watch the file for new lines
-## Currently not working. 
+## Haven't tested.
 def watch_file():
     try:
         # Logrotation check
@@ -124,6 +132,20 @@ def watch_file():
     except Exception as e:
         if err_log:
             logging.error(f"Error occurred: {e}\n{traceback.format_exc()}")
+
+def getIPInfo(ip):
+    response = requests.get(f"http://ip-api.com/json/{ip}")
+    if response.status_code == 200:
+        data = response.json()
+        if data.get("status") == "success":
+            return {
+                "country": data.get("country"),
+                "region": data.get("regionName"),
+                "isp": data.get("isp")
+            }
+        else:
+            return f"Error: {data.get('message', 'Unknown error')}"
+
 
 # Main
 clear_screen()
