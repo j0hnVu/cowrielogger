@@ -168,6 +168,8 @@ print(f"[Settings] Malicous CMD Logging = {cmd_log}")
 print(f"[Settings] IP Info Logging = {ip_info_log}")
 print(f"Watching {file_path} for new log entries...")
 print(f"{'Timestamp':<{int(x/4)}}{'Username':<{int(x/4)}}{'Password':<{int(x/4)}}{'IP Address':<{int(x/4)}}")
+
+# Keyboard Interupt 
 try:
     watch_file()
 except KeyboardInterrupt:
