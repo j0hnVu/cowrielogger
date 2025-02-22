@@ -37,7 +37,12 @@ Timestamp               Username           Password                   IP Address
 ```
 
 ``` ip.log
+192.168.1.1
+{'country': 'Some Country', 'region': 'Some Region', 'isp': 'Some ISP'}
+```
 
+``` cmd.log
+2025-02-25 11:10:03 from 192.168.1.1: echo "Hello"
 ```
 
 ## Notes
