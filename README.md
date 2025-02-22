@@ -1,10 +1,11 @@
 ## Cowrie SSH Honeypot Logger
 
-A Python script to monitor and display live SSH activity from a Cowrie honeypot log file. Formats output for terminal readability.
+A Python script to monitor and display live SSH activity from a Cowrie honeypot JSON log file. Formats output for terminal readability.
 
 ## Features
 - Real-time monitoring of SSH login attempts (success/failure) and executed commands
 - Output all malicious IPs and executed commands to log files for analysis
+- Retrieve IP's info like country, region, ISP from ip.api.com
 
 ## Requirements
 - Python 3.x
