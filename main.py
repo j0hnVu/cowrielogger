@@ -83,8 +83,8 @@ def process_line(line):
                     iplog.seek(0)
                     if event.get("src_ip") not in iplog.read():
                         iplog.write(f"{event.get("src_ip")}\n")
-                    if ip_info_log:
-                        iplog.write(f"{getIPInfo(event.get("src_ip"))}\n")
+                        if ip_info_log:
+                            iplog.write(f"{getIPInfo(event.get("src_ip"))}\n")
 
         if event.get("eventid") in ["cowrie.command.input"]:
             timestamp = datetime.strptime(event.get("timestamp"), '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
