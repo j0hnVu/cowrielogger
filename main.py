@@ -106,18 +106,18 @@ def process_line(line):
         pass
 
 # Function to watch the file for new lines
-## Doesn't work.
 def watch_file():
     try:
         # Logrotation check
         ## Time-based check logrotation time to break the loop.. Temp fix
+        ## Also doesn't work SMH
         while True:
             with open(file_path, 'r') as f:
                 # Move to the end of the file to watch for new lines
                 f.seek(0, 2)
             
                 while True:
-                    if datetime.datetime.now().strftime("%H:%M:%S") >= "23:59:58":
+                    if datetime.now().strftime("%H:%M:%S") >= "23:59:58":
                         print("[INFO] Approaching log rotation time. Waiting and reopening...")
                         time.sleep(3)  # Shorter sleep to avoid missing logs
                         break
