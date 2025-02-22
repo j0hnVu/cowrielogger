@@ -24,14 +24,20 @@ A Python script to monitor and display live SSH activity from a Cowrie honeypot 
 
    *cmd*: Executed command Logging to cmd.log
 
+   *ipinfo*: IP Info Logging using ip-api.com API (This will also enable ip logging)
+
 ## Example Output
-```
+``` Output
 [Settings] IP Logging = True
 [Settings] Error Logging = False
 Watching /path/to/cowrie.json for new log entries...
 Timestamp               Username           Password                   IP Address                    
 2025-02-15 00:58:01     root               root                       192.168.1.1
 2025-02-16 11:23:44     CMD:uname -m                                  192.168.1.1
+```
+
+``` ip.log
+
 ```
 
 ## Notes

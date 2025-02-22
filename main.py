@@ -1,7 +1,7 @@
 import json, time, os, logging, traceback, sys, requests
 from datetime import datetime
 
-# Path to your JSON file
+# Initialize file_path
 file_path = ''
 
 # IP Log & Error Log & CMD Log
@@ -106,7 +106,7 @@ def process_line(line):
         pass
 
 # Function to watch the file for new lines
-## Haven't tested.
+## Doesn't work.
 def watch_file():
     try:
         # Logrotation check
