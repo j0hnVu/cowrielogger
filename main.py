@@ -148,7 +148,7 @@ def getIPInfo(ip):
     if response.status_code == 200:
         data = response.json()
         if data.get("status") == "success":
-            return response
+            return data
         else:
             return f"Error: {data.get('message', 'Unknown error')}"
 
