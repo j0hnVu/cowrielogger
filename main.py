@@ -133,15 +133,11 @@ def watch_file():
             logging.error(f"Error occurred: {e}\n{traceback.format_exc()}")
 
 def getIPInfo(ip):
-    response = requests.get(f"http://ip-api.com/json/{ip}")
+    response = requests.get(f"http://ip-api.com/json/{ip}?fields=status,message,country,city,isp,org,proxy,hosting")
     if response.status_code == 200:
         data = response.json()
         if data.get("status") == "success":
-            return {
-                "country": data.get("country"),
-                "region": data.get("regionName"),
-                "isp": data.get("isp")
-            }
+            return response
         else:
             return f"Error: {data.get('message', 'Unknown error')}"
 
