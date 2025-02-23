@@ -109,23 +109,34 @@ def process_line(line):
 def watch_file():
     try:
         # Logrotation check
-        ## Time-based check logrotation time to break the loop.. Temp fix
         while True:
             with open(file_path, 'r') as f:
                 # Move to the end of the file to watch for new lines
-                f.seek(0, 2)
+                f.seek(0, os.SEEK_END)
+                current_inode = os.fstat(f.fileno()).st_ino
+                print(current_inode)
             
                 while True:
-                    if datetime.now().strftime("%H:%M:%S") >= "23:59:56":
-                        print("[INFO] Approaching log rotation time. Waiting and reopening...")
-                        time.sleep(5)  # Shorter sleep to avoid missing logs
-                        break
                     # Read new lines
                     new_line = f.readline()
             
                     if new_line:
                         process_line(new_line)
                     else:
+                        time.sleep(1)
+
+                    try:
+                        if os.stat(file_path).st_ino != current_inode:
+                            # Reopen the file with the new inode
+                            with open(file_path, 'r') as new_f:
+                                f.close()  # Close the old file
+                                f = new_f
+                                # Move to the end of the new file
+                                f.seek(0, os.SEEK_END)
+                                # Update the current inode
+                                current_inode = os.fstat(f.fileno()).st_ino
+                    except FileNotFoundError:
+                        # Handle the case where the file might not exist temporarily
                         time.sleep(1)
             continue
     except Exception as e:
