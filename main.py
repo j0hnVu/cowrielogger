@@ -127,14 +127,12 @@ def watch_file():
 
                     try:
                         if os.stat(file_path).st_ino != current_inode:
-                            # Reopen the file with the new inode
-                            with open(file_path, 'r') as new_f:
-                                f.close()  # Close the old file
-                                f = new_f
-                                # Move to the end of the new file
-                                f.seek(0, os.SEEK_END)
-                                # Update the current inode
-                                current_inode = os.fstat(f.fileno()).st_ino
+                            f.close()  # Close the old file
+                            f = open(file_path, 'r')
+                            # Move to the end of the new file
+                            f.seek(0, os.SEEK_END)
+                            # Update the current inode
+                            current_inode = os.fstat(f.fileno()).st_ino
                     except FileNotFoundError:
                         # Handle the case where the file might not exist temporarily
                         time.sleep(1)
