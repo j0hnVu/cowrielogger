@@ -15,8 +15,7 @@ A Python script to monitor and display live SSH activity from a Cowrie honeypot 
    ```bash
    git clone https://github.com/j0hnVu/cowrielogger.git
    cd cowrielogger
-   touch ip.log err.log cmd.log
-   python main.py ip err
+   python main.py ipinfo cmd err
    ```
 
    *ip*: IP Logging to ip.log
@@ -50,8 +49,6 @@ Timestamp               Username           Password                   IP Address
 2025-02-25 11:10:03 from 192.168.1.1: echo "Hello"
 ```
 
-## Notes
-- Ensure that the cowrie.json, ip.log, err.log log file **exists** before starting the script.
 
 ## Contribution
 Contributions and modifications are welcome!

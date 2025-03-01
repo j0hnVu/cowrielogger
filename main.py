@@ -14,6 +14,7 @@ ip_info_log = False
 ip_log_file = 'ip.log'
 err_log_file = 'err.log'
 cmd_log_file = 'cmd.log'
+event_log_file = 'event.log'
 
 # Find any args in command
 if "ip" in sys.argv:
@@ -49,21 +50,21 @@ row, col = os.popen('stty size', 'r').read().strip().split()
 x = int(col)
 
 # Universal clrscr
-def clear_screen():
+def clearScreen():
     os.system("cls" if os.name == "nt" else "clear")
 
 # Display
 
 ## 4 vars
-def display(a, b, c, d):
-    print(f"{a.ljust(int(x/4))}{b.ljust(int(x/4))}{c.ljust(int(x/4))}{d.ljust(int(x/4))}")
+def eventDisplay(a, b, c, d):
+    return f"{a.ljust(int(x/4))}{b.ljust(int(x/4))}{c.ljust(int(x/4))}{d.ljust(int(x/4))}"
 
 ## 3 vars
-def cmd_display(a, b, c):
-    print(f"{a.ljust(int(x/4))}CMD:{b.ljust(int(x/2)-4)}{c.ljust(int(x/4))}")
+def cmdDisplay(a, b, c):
+    return f"{a.ljust(int(x/4))}CMD:{b.ljust(int(x/2)-4)}{c.ljust(int(x/4))}"
 
 # Function to process the events
-def process_line(line):
+def processLine(line):
     try:
         event = json.loads(line.strip())  # Parse JSON from the line
 
@@ -75,12 +76,14 @@ def process_line(line):
             src_ip = event.get("src_ip")
 
             if username:
-                display(timestamp, username, password, src_ip)
+                print(eventDisplay(timestamp, username, password, src_ip))
+
+            with open(event_log_file, "a") as eventlog:
+                eventlog.write(f"{eventDisplay(timestamp, username, password, src_ip)}\n")
 
             # IP Logging
             if ip_log:
                 with open(ip_log_file, "a+") as iplog:
-                    iplog.seek(0)
                     if event.get("src_ip") not in iplog.read():
                         iplog.write(f"{event.get("src_ip")}\n")
                         if ip_info_log:
@@ -92,7 +95,7 @@ def process_line(line):
             src_ip = event.get("src_ip")
 
             if cmd:
-                cmd_display(timestamp, cmd, src_ip)
+                print(cmdDisplay(timestamp, cmd, src_ip))
 
             # CMD Logging
             if cmd_log:
@@ -103,10 +106,9 @@ def process_line(line):
         # Error Logging
         if err_log:
             logging.error(f"Error occurred: {e}\n{traceback.format_exc()}")
-        pass
 
 # Function to watch the file for new lines
-def watch_file():
+def watchFile():
     try:
         # Logrotation check
         while True:
@@ -114,14 +116,14 @@ def watch_file():
                 # Move to the end of the file to watch for new lines
                 f.seek(0, os.SEEK_END)
                 current_inode = os.fstat(f.fileno()).st_ino
-                print(current_inode)
+                # print(current_inode)
             
                 while True:
                     # Read new lines
                     new_line = f.readline()
             
                     if new_line:
-                        process_line(new_line)
+                        processLine(new_line)
                     else:
                         time.sleep(1)
 
@@ -152,7 +154,7 @@ def getIPInfo(ip):
 
 
 # Main
-clear_screen()
+clearScreen()
 
 while True:
     file_path = input("Cowrie JSON Location? (Default: ./cowrie.json\n").strip()
@@ -160,10 +162,10 @@ while True:
         file_path == "./cowrie.json"
     if os.path.exists(file_path):
         break
-    clear_screen()
+    clearScreen()
     print("Invalid Cowrie JSON file.")
 
-clear_screen()
+clearScreen()
 
 # Start watching the file
 print(f"[Settings] IP Logging = {ip_log}")
@@ -175,6 +177,6 @@ print(f"{'Timestamp':<{int(x/4)}}{'Username':<{int(x/4)}}{'Password':<{int(x/4)}
 
 # Keyboard Interupt 
 try:
-    watch_file()
+    watchFile()
 except KeyboardInterrupt:
     print("\nStopped file monitoring.")
