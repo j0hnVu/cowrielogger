@@ -15,6 +15,7 @@ ip_log_file = 'ip.log'
 err_log_file = 'err.log'
 cmd_log_file = 'cmd.log'
 event_log_file = 'event.log'
+ipinfo_log_file = 'ipinfo.log'
 
 # Find any args in command
 if "ip" in sys.argv:
@@ -30,7 +31,7 @@ if "cmd" in sys.argv:
 
 # Arg validating
 if len(sys.argv) > 5 or any(arg not in ["ip", "err", "cmd", "ipinfo"] for arg in sys.argv[1:]):
-    print("Usage: python main.py ip err cmd ipinfo")
+    print("Usage: python main.py ip err cmd")
     print("ip: IP Logging")
     print("err: Error Logging")
     print("cmd: Malicous CMD Logging")
@@ -78,16 +79,48 @@ def processLine(line):
             if username:
                 print(eventDisplay(timestamp, username, password, src_ip))
 
-            with open(event_log_file, "a") as eventlog:
-                eventlog.write(f"{eventDisplay(timestamp, username, password, src_ip)}\n")
-
             # IP Logging
             if ip_log:
                 with open(ip_log_file, "a+") as iplog:
+                    iplog.seek(0)
                     if event.get("src_ip") not in iplog.read():
                         iplog.write(f"{event.get("src_ip")}\n")
-                        if ip_info_log:
-                            iplog.write(f"{getIPInfo(event.get("src_ip"))}\n")
+            
+            # IP Info Logging
+            if ip_info_log:
+                # Check !isExist or !isEmpty
+                if not os.path.exists(ipinfo_log_file) or os.stat(ipinfo_log_file).st_size == 0:
+                    # Initialize file with new JSON obj
+                    new_ip_data = getIPInfo(event.get("src_ip"))
+                    if new_ip_data:
+                        new_ip_data["count"] = 1
+
+                        with open(ipinfo_log_file, "w") as ipinfolog:
+                            json.dump([new_ip_data], ipinfolog, indent=4)
+                else:
+                    with open(ipinfo_log_file, "r+") as ipinfolog:
+                        ip_data = json.load(ipinfolog)
+
+                        # Attempts for each IP 
+                        for entry in ip_data:
+                            if entry["query"] == event.get("src_ip"):
+                                entry["count"] += 1  # Increment count
+                                break
+                        else:
+                            # IP not found, add new entry
+                            new_ip_data = getIPInfo(event.get("src_ip"))
+                            if new_ip_data:
+                                new_ip_data["count"] = 1  # Initialize count
+                                ip_data.append(new_ip_data)
+
+                        # Write back to file
+                        ipinfolog.seek(0)
+                        json.dump(ip_data, ipinfolog, indent=4)
+                        ipinfolog.truncate()
+
+
+            with open(event_log_file, "a") as eventlog:
+                eventlog.write(f"{eventDisplay(timestamp, username, password, src_ip)}\n")
 
         if event.get("eventid") in ["cowrie.command.input"]:
             timestamp = datetime.strptime(event.get("timestamp"), '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
@@ -144,7 +177,7 @@ def watchFile():
             logging.error(f"Error occurred: {e}\n{traceback.format_exc()}")
 
 def getIPInfo(ip):
-    response = requests.get(f"http://ip-api.com/json/{ip}?fields=status,message,country,city,isp,org,proxy,hosting")
+    response = requests.get(f"http://ip-api.com/json/{ip}?fields=status,message,country,city,isp,org,proxy,hosting,query")
     if response.status_code == 200:
         data = response.json()
         if data.get("status") == "success":
