@@ -84,7 +84,7 @@ def processLine(line):
                 with open(ip_log_file, "a+") as iplog:
                     iplog.seek(0)
                     if event.get("src_ip") not in iplog.read():
-                        iplog.write(f"{event.get("src_ip")}\n")
+                        iplog.write(f"{event.get('src_ip')}\n")
             
             # IP Info Logging
             if ip_info_log:
