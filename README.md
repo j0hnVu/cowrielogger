@@ -41,12 +41,29 @@ Timestamp               Username           Password                   IP Address
 **ip.log**
 ```
 192.168.1.1
-{'country': 'Some Country', 'region': 'Some Region', 'isp': 'Some ISP'}
+192.168.1.2
 ```
 
 **cmd.log**
 ```
 2025-02-25 11:10:03 from 192.168.1.1: echo "Hello"
+```
+
+**ipinfo.log**
+```
+[
+    {
+        "status": "success",
+        "country": "Some where",
+        "city": "Some city",
+        "isp": "Some ISP",
+        "org": "Some ORG",
+        "proxy": false,
+        "hosting": false,
+        "query": "192.168.1.1",
+        "count": 1
+    }
+]
 ```
 
 
