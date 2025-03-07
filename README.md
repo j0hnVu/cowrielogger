@@ -15,6 +15,7 @@ A Python script to monitor and display live SSH activity from a Cowrie honeypot 
    ```bash
    git clone https://github.com/j0hnVu/cowrielogger.git
    cd cowrielogger
+   pip install -r requirements.txt
    python main.py ipinfo cmd err
    ```
 
