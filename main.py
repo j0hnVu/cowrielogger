@@ -1,8 +1,11 @@
+## TO-DO: Use IPINFO JSON DB
+
 import json, time, os, logging, traceback, sys, requests
 from datetime import datetime
 
 # Initialize file_path
 file_path = ''
+ipinfo_token = ''
 
 # IP Log & Error Log & CMD Log
 ip_log = False
@@ -16,6 +19,7 @@ err_log_file = 'err.log'
 cmd_log_file = 'cmd.log'
 event_log_file = 'event.log'
 ipinfo_log_file = 'ipinfo.log'
+token_file = '.token'
 
 # Find any args in command
 if "ip" in sys.argv:
@@ -182,8 +186,27 @@ def getIPInfo(ip):
         data = response.json()
         if data.get("status") == "success":
             return data
+        elif getToken():
+            # Query limit reached
+            ipinfo_token = getToken()
+            response = requests.get(f"https://ipinfo.io/{ip}?token={ipinfo_token}")
+            data = response.json()
+            return data
         else:
-            return f"Error: {data.get('message', 'Unknown error')}"
+            #TO-DO: GET ipinfo db file
+            pass
+    else:
+        return f"Error. Code:{response.status_code}"
+
+def getToken():
+    if os.path.exists(token_file) and os.stat(token_file).st_size != 0:
+        print("IPINFO Token found.")
+        with open(token_file, 'r') as tokenfile:
+            token = tokenfile.read().strip()
+            ipinfo_token = token.split('=')[1].strip().strip('"')
+        return ipinfo_token
+    else:
+        return None
 
 
 # Main
