@@ -28,8 +28,9 @@ A Python script to monitor and display live SSH activity from a Cowrie honeypot 
    *ipinfo*: IP Info Logging using ip-api.com API (This will also enable ip logging)
 
 ## Example Output
+### For realistic output of log files, go to [this repo](https://github.com/j0hnVu/malicious-ip-list) where i put real output of my VPS automatically commited everyday.
 
-**Output:**
+**Terminal output:**
 ``` 
 [Settings] IP Logging = True
 [Settings] Error Logging = False
