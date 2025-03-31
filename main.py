@@ -7,6 +7,7 @@ from datetime import datetime
 cowrie_log_path = ''
 output_log_path = 'output'
 tokens = {}
+ipinfo_source = "ipapi" # Available options: ipapi, ipinfo
 
 # IP Log & Error Log & CMD Log
 ip_log = False
@@ -49,6 +50,7 @@ logging.basicConfig(
 row, col = os.popen('stty size', 'r').read().strip().split()
 x = int(col)
 
+# General function to get user input
 def getUserInput(prompt):
     while True:
         response = input(prompt).lower()
@@ -75,9 +77,9 @@ def clearScreen():
 
 def display(*args):
     if len(args) == 3:
-        return f"{a.ljust(int(x/4))}CMD:{b.ljust(int(x/2)-4)}{c.ljust(int(x/4))}"
+        return f"{args[0].ljust(int(x/4))}CMD:{args[1].ljust(int(x/2)-4)}{args[2].ljust(int(x/4))}"
     elif len(args) == 4:
-        return f"{a.ljust(int(x/4))}{b.ljust(int(x/4))}{c.ljust(int(x/4))}{d.ljust(int(x/4))}"
+        return f"{args[0].ljust(int(x/4))}{args[1].ljust(int(x/4))}{args[2].ljust(int(x/4))}{args[3].ljust(int(x/4))}"
     else:
         return "Something Wrong."
 
@@ -193,22 +195,42 @@ def watchFile():
         if err_log:
             logging.error(f"Error occurred: {e}\n{traceback.format_exc()}")
 
+
 def getIPInfo(ip):
-    response = requests.get(f"http://ip-api.com/json/{ip}?fields=status,message,country,city,isp,org,proxy,hosting,query")
-    if response.status_code == 200:
-        data = response.json()
-        if data.get("status") == "success":
-            return data
-        elif tokens.get('IPINFO_TOKEN'):
-            # Query limit reached
-            ipinfo_token = tokens.get('IPINFO_TOKEN')
-            response = requests.get(f"https://ipinfo.io/{ip}?token={ipinfo_token}")
-            data = response.json()
-            return data
+    global ipinfo_source
+    ipinfo_token = tokens.get('IPINFO_TOKEN')
+    
+    # API endpoints
+    ipapi_url = f"http://ip-api.com/json/{ip}?fields=status,message,country,city,isp,org,proxy,hosting,query"
+    ipinfo_url = f"https://ipinfo.io/{ip}?token={ipinfo_token}" if ipinfo_token else None
+
+    try:
+        if ipinfo_source == "ipapi":
+            # Try IP-API first
+            response = requests.get(ipapi_url)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("status") == "success":
+                    return data
+                else:
+                    logging.warning("IP-API query limit reached or other issue.")
+                    # Switch to IPInfo
+                    ipinfo_source = "ipinfo"
+            else:
+                logging.warning(f"IP-API returned status code {response.status_code}")
+                # Switch to IPInfo
+                ipinfo_source = "ipinfo"
+        elif ipinfo_source == "ipinfo" and ipinfo_url:
+            # Use IPInfo
+            response = requests.get(ipinfo_url)
+            if response.status_code == 200:
+                return response.json()
+            else:
+                logging.warning(f"IPInfo API returned status code {response.status_code}")
         else:
-            print("No Available Info Source.")
-    else:
-        return f"Error. Code:{response.status_code}"
+            logging.error("No available source for IP information.")
+    except Exception as e:
+        logging.error(f"Error occurred: {e}\n{traceback.format_exc()}")
 
 # Main
 # Arg validating
